@@ -8,7 +8,7 @@ webix.ui(
             },
             {cols: [
                     {type: "clean", css: "navigation-background", rows: [
-                            {view: "list", template: "#title#", select: true, css: "navigation-background", data: [
+                            {view: "list", template: "#title#", scroll:false, select: true, css: "navigation-background", data: [
                                     {id: 1, title: "Dashboard"},
                                     {id: 2, title: "Users"},
                                     {id: 3, title: "Products"},
@@ -20,7 +20,7 @@ webix.ui(
                         ]
                     },
                     {view: "resizer"},
-                    {view: "datatable", autoConfig: true, data: small_film_set, gravity: 4, columns:[
+                    {view: "datatable", autoConfig: true, data: small_film_set, gravity: 4, scrollX:false, columns:[
                             {id:"title", header: "Title", fillspace: true},
                             {id:"year", header: "Year"},
                             {id:"votes", header: "Votes"},
@@ -44,11 +44,7 @@ webix.ui(
                             {}
                             ]}
                 ]},
-            {type:"clean", cols:[
-                    {},
-                    {template: "The software is provided by <a href='https://webix.com/'>webix.com</a>. All rights reserved (c)", height: 40},
-                    {}
-                ]}
+            {view: "label", css:"footer-text", height:35, template: "The software is provided by <a href='https://webix.com/'>webix.com</a>. All rights reserved (c)"}
         ]
     }
 );
