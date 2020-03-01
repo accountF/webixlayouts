@@ -10,3 +10,20 @@
 .footer-text {
     text-align: center;
 }
+
+.row-in-table-background{
+    background-color: #F4F5F9;
+}
+
+.hover-background{
+    background-color: #98b3ff;
+}
+
+.wxi-close{
+    float:right;
+    margin-top: 5px;
+}
+
+.list-users .webix_list_item:nth-child(-n+5){
+    background-color: #ffb9da;
+}
