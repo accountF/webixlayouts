@@ -111,9 +111,6 @@ const formInMainPart = {
     }
 };
 
-let xhr = webix.ajax().sync().get("data/users.js");
-let dataUsers = JSON.parse(xhr.responseText);
-
 const listInMainPart = {
     rows: [
         {
@@ -143,7 +140,7 @@ const listInMainPart = {
             view: "list",
             id: "list-users",
             css: "list-users",
-            data: webix.copy(dataUsers),
+            url:"data/users.js",
             select: true,
             template: "#name# form #country# <span class='webix_icon wxi-close'></span>",
             onClick: {
@@ -158,7 +155,7 @@ const listInMainPart = {
 const chartInMainPart = {
     view: "chart",
     value:"#age#",
-    data: webix.copy(dataUsers),
+    url:"data/users.js",
     type:"bar",
     xAxis:{
         template:"#age#",
