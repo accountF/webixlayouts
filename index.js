@@ -74,6 +74,7 @@ const tableInMainPart = {
 const formInMainPart = {
         view: "form",
         id: "form-film",
+        width: 400,
         elements: [
             {type: "section", template: "Edit films"},
             {view: "text", label: "Title", name: "title", invalidMessage: "Title must be filled in"},
@@ -145,7 +146,7 @@ const listInMainPart = {
                     }},
                 {view: "button", id: "btn-add-user", value: "Add User", css: "webix_primary", width: 150, click:function(){
                         const age = Math.floor(Math.random() * 100) + 1;
-                        $$("list-users").add({name:"User", country:"USA", age: age});
+                        $$("list-users").add({name:"User", country:"USA", age: age}, 0);
                     }},
             ]
         },
@@ -267,11 +268,7 @@ webix.ui(
                     {
                         view: "multiview", gravity: 5,
                         cells: [
-                            {id: "Dashboard", cols: [
-                                {rows: [tabbarForFilteringYear,tableInMainPart]},
-                                    {width: 400, rows:[formInMainPart]}
-                                    ]
-                            },
+                            {id: "Dashboard", cols: [{rows: [tabbarForFilteringYear,tableInMainPart]}, formInMainPart]},
                             {id: "Users", rows: [listInMainPart,chartInMainPart]},
                             {id: "Products", rows:[treeInMainPart]},
                             {id: "Locations", template: "Place for Locations"}
