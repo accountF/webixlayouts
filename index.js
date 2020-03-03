@@ -9,25 +9,6 @@ const popupWithProfileList = webix.ui({
     }
 });
 
-const addFilm = function () {
-    const filmForm = $$("form-film");
-    const filmTable = $$("table-films");
-    if (filmForm.validate()) {
-        const filmInfo = filmForm.getValues();
-        const filmId = filmInfo.id;
-        if (filmId) {
-            filmTable.updateItem(filmId, filmInfo);
-            webix.message({text: "Film was updated!", type: "success"})
-        } else {
-            filmTable.add(filmInfo);
-            webix.message({text: "Film was added!", type: "success"})
-        }
-        filmForm.clear();
-    } else {
-        webix.message({text: "Check fields please", type: "error"})
-    }
-};
-
 const clearForm = function () {
     const filmForm = $$("form-film");
     webix.confirm({
@@ -40,6 +21,22 @@ const clearForm = function () {
     })
 };
 
+const tabbarForFilteringYear = {
+    view:"tabbar",
+    id:"tabbar",
+    options:[
+        { value:"All", id:"allFilms"},
+        { value:"Old", id:"oldFilms"},
+        { value:"Modern", id:"modernFilms"},
+        { value: "New", id:"newFilms"}
+    ],
+    on:{
+        onChange:function(){
+            $$("table-films").filterByAll();
+        }
+    }
+};
+
 const tableInMainPart = {
     view: "datatable",
     id: "table-films",
@@ -49,21 +46,15 @@ const tableInMainPart = {
     gravity: 4,
     scrollX: false,
     hover: "hover-background",
+    editable:true,
     columns: [
         {id: "id", autoWidth: true, header:"", css: "row-in-table-background", width:60},
         {id: "title", sort: "string", header: ["Title", {content: "textFilter"}], fillspace: true},
-        {id: "year", sort: "int", header: ["Year", {content: "textFilter"}]},
+        {id: "cat_id", header: ["Category", {content:"selectFilter"}], editor:"select", options:"data/categories.js"},
         {id: "votes", sort: "int", header: ["Votes", {content: "textFilter"}]},
+        {id: "year", sort: "int", header: "Year"},
         {id: "del", header:"", template: "{common.trashIcon()}", width:50}
     ],
-    on: {
-        onAfterSelect: function (id) {
-            const film = this.getItem(id);
-            const filmForm = $$("form-film");
-            filmForm.clearValidation();
-            filmForm.setValues(film);
-        }
-    },
     onClick: {
         "wxi-trash": function (e, id) {
             this.remove(id);
@@ -75,41 +66,59 @@ const tableInMainPart = {
             if(obj.votes.includes(",")){
                 obj.votes = Math.ceil(obj.votes.replace(",",".")*1000);
             }
+            obj.cat_id = Math.floor(Math.random() * 4) + 1;
         }
     }
 };
 
 const formInMainPart = {
-    view: "form",
-    id: "form-film",
-    gravity: 2.5,
-    elements: [
-        {type: "section", template: "Edit films"},
-        {view: "text", label: "Title", name: "title", invalidMessage: "Title must be filled in"},
-        {view: "text", label: "Year", name: "year", invalidMessage: "Year should be between 1900 and current"},
-        {view: "text", label: "Rating", name: "rating", invalidMessage: "Rating cannot be empty or 0"},
-        {view: "text", label: "Votes", name: "votes", invalidMessage: "Votes must be less than 1'000'000 and filled in"},
-        {
-            margin: 50, cols: [
-                {view: "button", value: "Add", css: "webix_primary", click: addFilm},
-                {view: "button", value: "Clear", click: clearForm}
-            ]
-        },
-        {}
-    ],
-    rules: {
-        title: webix.rules.isNotEmpty,
-        year: function (value) {
-            return 1900 <= value && value <= new Date().getFullYear();
-        },
-        rating: function (value) {
-            return webix.rules.isNotEmpty(value) && value !== "0"
-        },
-        votes: function (value) {
-            return webix.rules.isNotEmpty(value) && value < 1000000;
+        view: "form",
+        id: "form-film",
+        elements: [
+            {type: "section", template: "Edit films"},
+            {view: "text", label: "Title", name: "title", invalidMessage: "Title must be filled in"},
+            {view: "text", label: "Year", name: "year", invalidMessage: "Year should be between 1900 and current"},
+            {view: "text", label: "Rating", name: "rating", invalidMessage: "Rating cannot be empty or 0"},
+            {view: "text", label: "Votes", name: "votes", invalidMessage: "Votes must be less than 1'000'000 and filled in"},
+            {
+                margin: 50, cols: [
+                    {
+                        view: "button", value: "Add", css: "webix_primary", click:
+                            function () {
+                                const form = $$("form-film");
+                                    if (!form.validate()) {
+                                        webix.message("Please check fields");
+                                        return false;
+                                    } else {
+                                        form.save();
+                                        webix.message("Film was added");
+                                        form.clear();
+                                    }
+                            }
+                    },
+                    {view: "button", value: "Clear", click: clearForm}
+                ]
+            },
+            {}
+        ],
+        rules: {
+            title: webix.rules.isNotEmpty,
+            year: function (value) {
+                return 1900 <= value && value <= new Date().getFullYear();
+            },
+            rating: function (value) {
+                return webix.rules.isNotEmpty(value) && value !== "0"
+            },
+            votes: function (value) {
+                return webix.rules.isNotEmpty(value) && value < 1000000;
+            }
         }
-    }
-};
+    };
+
+webix.protoUI({
+    name:"editlist"
+}, webix.EditAbility, webix.ui.list);
+
 
 const listInMainPart = {
     rows: [
@@ -134,19 +143,39 @@ const listInMainPart = {
                 {view: "button", id: "btn-sort-desc", value: "Sort desc", css: "webix_primary", width: 150, click:function(){
                         $$("list-users").sort("#name#","desc");
                     }},
+                {view: "button", id: "btn-add-user", value: "Add User", css: "webix_primary", width: 150, click:function(){
+                        const age = Math.floor(Math.random() * 100) + 1;
+                        $$("list-users").add({name:"User", country:"USA", age: age});
+                    }},
             ]
         },
         {
-            view: "list",
+            view: "editlist",
+            editable: true,
+            editor: "text",
+            editValue: "name",
             id: "list-users",
-            css: "list-users",
             url:"data/users.js",
             select: true,
-            template: "#name# form #country# <span class='webix_icon wxi-close'></span>",
+            template: "#name# from #country#, #age# <span class='webix_icon wxi-close'></span>",
             onClick: {
                 "wxi-close": function (e, id) {
                     this.remove(id);
                     return false;
+                }
+            },
+            scheme: {
+                $init: function (user) {
+                    if(user.age < 26){
+                        user.$css = "user-yellow-background";
+                    }
+                }
+            },
+            on: {
+                onBeforeEditStop: function (user) {
+                    if (user.value === "") {
+                        return false;
+                    }
                 }
             }
         }]
@@ -154,24 +183,30 @@ const listInMainPart = {
 
 const chartInMainPart = {
     view: "chart",
-    value:"#age#",
-    url:"data/users.js",
+    id: "chart-users",
+    value:"#name#",
     type:"bar",
     xAxis:{
-        template:"#age#",
-        title:"Age"
+        template:"#country#",
+        title:"Country"
     },
+    yAxis:{},
 };
 
 const treeInMainPart = {
     view: "treetable",
     id:"tree-products",
+    editable: true,
     columns:[
         { id:"id", header:"", width:50 },
         { id:"title", header:"Title", fillspace: true,
-            template:"{common.treetable()} #title#" },
-        { id:"price", header:"Price", width:200 }
+            template:"{common.treetable()} #title#", editor:"text" },
+        { id:"price", header:"Price", width:200, editor:"text"}
     ],
+    rules:{
+        "title": webix.rules.isNotEmpty,
+        "price": webix.rules.isNumber
+    },
     select:"cell",
     autoHeight:true,
     scroll:"y"
@@ -232,7 +267,11 @@ webix.ui(
                     {
                         view: "multiview", gravity: 5,
                         cells: [
-                            {id: "Dashboard", cols: [tableInMainPart, formInMainPart]},
+                            {id: "Dashboard", cols: [
+                                {rows: [tabbarForFilteringYear,tableInMainPart]},
+                                    {width: 400, rows:[formInMainPart]}
+                                    ]
+                            },
                             {id: "Users", rows: [listInMainPart,chartInMainPart]},
                             {id: "Products", rows:[treeInMainPart]},
                             {id: "Locations", template: "Place for Locations"}
@@ -254,3 +293,33 @@ treeInProducts.load("data/products.js").then(function(){
     treeInProducts.openAll();
 });
 
+$$("form-film").bind($$("table-films"));
+
+$$("table-films").registerFilter(
+    $$("tabbar"),
+    {
+        columnId: "year",
+        compare: function (year, filter, item) {
+            if (filter === "allFilms") return year;
+            else if (filter === "newFilms") return year >= 2000;
+            else if (filter === "modernFilms") return year >= 1980 && year < 2000;
+            else if (filter === "oldFilms") return year < 1980;
+        }
+    },
+    {
+        getValue: function (node) {
+            return node.getValue();
+        },
+        setValue: function (node, value) {
+            node.setValue(value);
+        }
+    });
+
+$$("chart-users").sync($$("list-users"), function(){
+    this.group({
+        by:"country",
+        map:{
+            name:["country", "count"]
+        }
+    });
+});
