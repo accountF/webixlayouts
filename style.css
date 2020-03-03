@@ -24,6 +24,6 @@
     margin-top: 5px;
 }
 
-.list-users .webix_list_item:nth-child(-n+5){
-    background-color: #ffb9da;
+.user-yellow-background{
+    background-color: yellow;
 }
