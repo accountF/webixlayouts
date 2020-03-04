@@ -1,3 +1,18 @@
+let userCollection = new webix.DataCollection({
+    url:"data/users.js",
+    scheme:{
+        $init:function(user){
+            if(user.age < 26){
+                user.$css = "user-yellow-background";
+            }
+        }
+    }
+});
+
+let categoryCollection = new webix.DataCollection({
+    url:"data/categories.js"
+});
+
 const popupWithProfileList = webix.ui({
     view: "popup",
     id: "profile-menu",
@@ -37,10 +52,9 @@ const tabbarForFilteringYear = {
     }
 };
 
-const tableInMainPart = {
+const tableInDashboard = {
     view: "datatable",
     id: "table-films",
-    autoConfig: true,
     select: true,
     url: "data/data.js",
     gravity: 4,
@@ -50,7 +64,7 @@ const tableInMainPart = {
     columns: [
         {id: "id", autoWidth: true, header:"", css: "row-in-table-background", width:60},
         {id: "title", sort: "string", header: ["Title", {content: "textFilter"}], fillspace: true},
-        {id: "cat_id", header: ["Category", {content:"selectFilter"}], editor:"select", options:"data/categories.js"},
+        {id: "cat_id", header: ["Category", {content:"selectFilter"}], editor:"select", options:categoryCollection},
         {id: "votes", sort: "int", header: ["Votes", {content: "textFilter"}]},
         {id: "year", sort: "int", header: "Year"},
         {id: "del", header:"", template: "{common.trashIcon()}", width:50}
@@ -71,7 +85,7 @@ const tableInMainPart = {
     }
 };
 
-const formInMainPart = {
+const formInDashboard = {
         view: "form",
         id: "form-film",
         width: 400,
@@ -81,6 +95,7 @@ const formInMainPart = {
             {view: "text", label: "Year", name: "year", invalidMessage: "Year should be between 1900 and current"},
             {view: "text", label: "Rating", name: "rating", invalidMessage: "Rating cannot be empty or 0"},
             {view: "text", label: "Votes", name: "votes", invalidMessage: "Votes must be less than 1'000'000 and filled in"},
+            {view: "richselect", label: "Category", options: categoryCollection},
             {
                 margin: 50, cols: [
                     {
@@ -120,8 +135,7 @@ webix.protoUI({
     name:"editlist"
 }, webix.EditAbility, webix.ui.list);
 
-
-const listInMainPart = {
+const listInUsers = {
     rows: [
         {
             view: "toolbar",
@@ -146,7 +160,7 @@ const listInMainPart = {
                     }},
                 {view: "button", id: "btn-add-user", value: "Add User", css: "webix_primary", width: 150, click:function(){
                         const age = Math.floor(Math.random() * 100) + 1;
-                        $$("list-users").add({name:"User", country:"USA", age: age}, 0);
+                        userCollection.add({name:"User", country:"USA", age: age}, 0);
                     }},
             ]
         },
@@ -156,20 +170,12 @@ const listInMainPart = {
             editor: "text",
             editValue: "name",
             id: "list-users",
-            url:"data/users.js",
             select: true,
             template: "#name# from #country#, #age# <span class='webix_icon wxi-close'></span>",
             onClick: {
                 "wxi-close": function (e, id) {
-                    this.remove(id);
+                    userCollection.remove(id);
                     return false;
-                }
-            },
-            scheme: {
-                $init: function (user) {
-                    if(user.age < 26){
-                        user.$css = "user-yellow-background";
-                    }
                 }
             },
             on: {
@@ -182,7 +188,7 @@ const listInMainPart = {
         }]
 };
 
-const chartInMainPart = {
+const chartInUsers = {
     view: "chart",
     id: "chart-users",
     value:"#name#",
@@ -194,7 +200,7 @@ const chartInMainPart = {
     yAxis:{},
 };
 
-const treeInMainPart = {
+const treeInProducts = {
     view: "treetable",
     id:"tree-products",
     editable: true,
@@ -211,6 +217,54 @@ const treeInMainPart = {
     select:"cell",
     autoHeight:true,
     scroll:"y"
+};
+
+const tableInAdmin = {
+    view: "datatable",
+    id: "table-categories",
+    select: true,
+    scrollX: false,
+    editable: true,
+    columns: [
+        {id: "id", autoWidth: true, header:"", css: "row-in-table-background", width:60},
+        {id: "value", header:"Value", fillspace: true, editor: "text"},
+        {id: "del", header:"", template: "{common.trashIcon()}", width:50}
+    ],
+    onClick: {
+        "wxi-trash": function (e, id) {
+            categoryCollection.remove(id);
+            return false;
+        }
+    },
+};
+
+const formInAdmin = {
+    view: "form",
+    id: "form-categories",
+    width: 400,
+    elements: [
+        {type: "section", template: "Add categories"},
+        {view: "text", placeholder: "Enter Category", name: "value", invalidMessage: "Category must be filled in"},
+        {cols: [
+                {view: "button", value: "Add", css: "webix_primary", click:
+                        function () {
+                            const form = $$("form-categories");
+                            if (!form.validate()) {
+                                webix.message("Please check fields");
+                                return false;
+                            } else {
+                                categoryCollection.add(form.getValues(), 0)
+                                webix.message("Category was added");
+                                form.clear();
+                            }
+                        }
+                }
+            ]
+        }
+    ],
+    rules: {
+        value: webix.rules.isNotEmpty
+    }
 };
 
 webix.ui(
@@ -248,8 +302,11 @@ webix.ui(
                                     {id: "Dashboard", title: "Dashboard"},
                                     {id: "Users", title: "Users"},
                                     {id: "Products", title: "Products"},
-                                    {id: "Locations", title: "Locations"}
+                                    {id: "Admin", title: "Admin"}
                                 ],
+                                ready: function(){
+                                    this.select(this.getFirstId());
+                                },
                                 on: {
                                     onAfterSelect: function(id) {
                                         $$(id).show();
@@ -268,10 +325,10 @@ webix.ui(
                     {
                         view: "multiview", gravity: 5,
                         cells: [
-                            {id: "Dashboard", cols: [{rows: [tabbarForFilteringYear,tableInMainPart]}, formInMainPart]},
-                            {id: "Users", rows: [listInMainPart,chartInMainPart]},
-                            {id: "Products", rows:[treeInMainPart]},
-                            {id: "Locations", template: "Place for Locations"}
+                            {id: "Dashboard", cols: [{rows: [tabbarForFilteringYear,tableInDashboard]}, formInDashboard]},
+                            {id: "Users", rows: [listInUsers,chartInUsers]},
+                            {id: "Products", rows:[treeInProducts]},
+                            {id: "Admin", cols:[tableInAdmin, {rows:[ formInAdmin, {}]}]}
                         ]
                     }
                 ]
@@ -285,9 +342,9 @@ webix.ui(
     }
 );
 
-const treeInProducts = $$("tree-products");
-treeInProducts.load("data/products.js").then(function(){
-    treeInProducts.openAll();
+const productsTree = $$("tree-products");
+productsTree.load("data/products.js").then(function(){
+    productsTree.openAll();
 });
 
 $$("form-film").bind($$("table-films"));
@@ -297,10 +354,20 @@ $$("table-films").registerFilter(
     {
         columnId: "year",
         compare: function (year, filter, item) {
-            if (filter === "allFilms") return year;
-            else if (filter === "newFilms") return year >= 2000;
-            else if (filter === "modernFilms") return year >= 1980 && year < 2000;
-            else if (filter === "oldFilms") return year < 1980;
+            switch (filter) {
+                case "allFilms":
+                    return true;
+                    break;
+                case "newFilms":
+                    return year >= 2000;
+                    break;
+                case "modernFilms":
+                    return year >= 1980 && year < 2000;
+                    break;
+                case "oldFilms":
+                    return year < 1980;
+                    break;
+            }
         }
     },
     {
@@ -312,7 +379,8 @@ $$("table-films").registerFilter(
         }
     });
 
-$$("chart-users").sync($$("list-users"), function(){
+$$("list-users").sync(userCollection);
+$$("chart-users").sync(userCollection, function(){
     this.group({
         by:"country",
         map:{
@@ -320,3 +388,5 @@ $$("chart-users").sync($$("list-users"), function(){
         }
     });
 });
+
+$$("table-categories").sync(categoryCollection);
