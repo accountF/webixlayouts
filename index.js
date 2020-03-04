@@ -305,7 +305,7 @@ webix.ui(
                                     {id: "Admin", title: "Admin"}
                                 ],
                                 ready: function(){
-                                    this.select(("Dashboard"));
+                                    this.select(this.getFirstId());
                                 },
                                 on: {
                                     onAfterSelect: function(id) {
