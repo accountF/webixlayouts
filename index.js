@@ -353,10 +353,20 @@ $$("table-films").registerFilter(
     {
         columnId: "year",
         compare: function (year, filter, item) {
-            if (filter === "allFilms") return true;
-            else if (filter === "newFilms") return year >= 2000;
-            else if (filter === "modernFilms") return year >= 1980 && year < 2000;
-            else if (filter === "oldFilms") return year < 1980;
+            switch (filter) {
+                case "allFilms":
+                    return true;
+                    break;
+                case "newFilms":
+                    return year >= 2000;
+                    break;
+                case "modernFilms":
+                    return year >= 1980 && year < 2000;
+                    break;
+                case "oldFilms":
+                    return year < 1980;
+                    break;
+            }
         }
     },
     {
