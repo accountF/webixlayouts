@@ -1,5 +1,12 @@
 let userCollection = new webix.DataCollection({
-    url:"data/users.js"
+    url:"data/users.js",
+    scheme:{
+        $init:function(user){
+            if(user.age < 26){
+                user.$css = "user-yellow-background";
+            }
+        }
+    }
 });
 
 let categoryCollection = new webix.DataCollection({
@@ -170,13 +177,6 @@ const listInUsers = {
                 "wxi-close": function (e, id) {
                     userCollection.remove(id);
                     return false;
-                }
-            },
-            scheme: {
-                $init: function (user) {
-                    if(user.age < 26){
-                        user.$css = "user-yellow-background";
-                    }
                 }
             },
             on: {
