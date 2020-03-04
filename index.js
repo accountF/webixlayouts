@@ -55,7 +55,6 @@ const tabbarForFilteringYear = {
 const tableInDashboard = {
     view: "datatable",
     id: "table-films",
-    autoConfig: true,
     select: true,
     url: "data/data.js",
     gravity: 4,
@@ -223,7 +222,6 @@ const treeInProducts = {
 const tableInAdmin = {
     view: "datatable",
     id: "table-categories",
-    autoConfig: true,
     select: true,
     scrollX: false,
     editable: true,
@@ -306,6 +304,9 @@ webix.ui(
                                     {id: "Products", title: "Products"},
                                     {id: "Admin", title: "Admin"}
                                 ],
+                                ready: function(){
+                                    this.select(("Dashboard"));
+                                },
                                 on: {
                                     onAfterSelect: function(id) {
                                         $$(id).show();
