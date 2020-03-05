@@ -27,3 +27,28 @@
 .user-yellow-background{
     background-color: yellow;
 }
+
+.webix_el_buttonWithState.button-state-0 button {
+    background-color: #c6c9ff;
+}
+
+.webix_el_buttonWithState.button-state-0 button:hover {
+    background-color: #c6c9ff;
+}
+
+
+.webix_el_buttonWithState.button-state-1 button {
+    background-color: #ffe4ea;
+}
+
+.webix_el_buttonWithState.button-state-1 button:hover {
+    background-color: #ffe4ea;
+}
+
+.webix_el_buttonWithState.button-state-2 button {
+    background-color: #e4ffe2;
+}
+
+.webix_el_buttonWithState.button-state-2 button:hover {
+    background-color: #e4ffe2;
+}
