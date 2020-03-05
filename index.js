@@ -135,6 +135,7 @@ webix.protoUI({
     name:"editlist"
 }, webix.EditAbility, webix.ui.list);
 
+
 const listInUsers = {
     rows: [
         {
@@ -152,12 +153,24 @@ const listInUsers = {
                         }
                     }
                 },
-                {view: "button", id: "btn-sort-asc", value: "Sort asc", css: "webix_primary", width: 150, click:function(){
-                        $$("list-users").sort("#name#","asc");
-                    }},
-                {view: "button", id: "btn-sort-desc", value: "Sort desc", css: "webix_primary", width: 150, click:function(){
-                        $$("list-users").sort("#name#","desc");
-                    }},
+                {view: "buttonWithState", states: {0:"Off",1:"SortAsc",2:"Sort Desc"},  width: 150, state: 0,
+                    on: {
+                        onStateChange: function (state) {
+                            let users = $$("list-users");
+                            switch (state) {
+                                case 0:
+                                    users.sort("#id#", "asc", "int");
+                                    break;
+                                case 1:
+                                    users.sort("#name#", "asc");
+                                    break;
+                                case 2:
+                                    users.sort("#name#", "desc");
+                                    break;
+                            }
+                        }
+                    }
+                },
                 {view: "button", id: "btn-add-user", value: "Add User", css: "webix_primary", width: 150, click:function(){
                         const age = Math.floor(Math.random() * 100) + 1;
                         userCollection.add({name:"User", country:"USA", age: age}, 0);
@@ -171,7 +184,7 @@ const listInUsers = {
             editValue: "name",
             id: "list-users",
             select: true,
-            template: "#name# from #country#, #age# <span class='webix_icon wxi-close'></span>",
+            template: "#id# | #name# from #country#, #age# <span class='webix_icon wxi-close'></span>",
             onClick: {
                 "wxi-close": function (e, id) {
                     userCollection.remove(id);
@@ -302,7 +315,8 @@ webix.ui(
                                     {id: "Dashboard", title: "Dashboard"},
                                     {id: "Users", title: "Users"},
                                     {id: "Products", title: "Products"},
-                                    {id: "Admin", title: "Admin"}
+                                    {id: "Admin", title: "Admin"},
+                                    {id: "Forms", title: "Forms"}
                                 ],
                                 ready: function(){
                                     this.select(this.getFirstId());
@@ -328,8 +342,10 @@ webix.ui(
                             {id: "Dashboard", cols: [{rows: [tabbarForFilteringYear,tableInDashboard]}, formInDashboard]},
                             {id: "Users", rows: [listInUsers,chartInUsers]},
                             {id: "Products", rows:[treeInProducts]},
-                            {id: "Admin", cols:[tableInAdmin, {rows:[ formInAdmin, {}]}]}
-                        ]
+                            {id: "Admin", cols:[tableInAdmin, {rows:[ formInAdmin, {}]}]},
+                            {id: "Forms", rows:[{ view: "formGenerator", fields: ["one", "two"]}, {}]}
+                        ],
+                        fitBiggest:true
                     }
                 ]
             },
