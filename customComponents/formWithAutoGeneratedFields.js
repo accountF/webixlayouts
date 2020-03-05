@@ -4,7 +4,7 @@ webix.protoUI({
         const fields = config.fields;
         const generateElements = fields.map((field) => {
             return {
-                label: field[0].toUpperCase() + field.slice(1),
+                label: `${field[0].toUpperCase()}${field.slice(1)}`,
                 view: "text",
                 name: field
             }
